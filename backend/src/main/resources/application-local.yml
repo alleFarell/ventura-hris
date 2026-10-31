@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    show-sql: true
+  security:
+    user:
+      name: ${VENTURA_DEV_USERNAME:admin}
+      password: ${VENTURA_DEV_PASSWORD:admin123}
+
+ventura:
+  security:
+    cors:
+      allowed-origins: ${VENTURA_CORS_ALLOWED_ORIGINS:http://localhost:310*,http://127.0.0.1:310*}
+
+logging:
+  level:
+    com.ventura.hris: DEBUG
+    org.springframework.security: INFO

@@ -1,0 +1,6578 @@
+openapi: 3.1.0
+info:
+  title: Ventura HRIS Foundation API
+  version: 0.20.0
+  description: Foundation APIs for Auth, Setup, Organization, Employee, Governance, Shift Scheduling, Daily Attendance Tracking, Leave Management, WFH, Overtime, Monthly Recaps, Salary Components, Tax Structures, Payroll Engine, Loans, Reimbursements, Payslips, Disbursals, BPJS Social Security, Benefits, Job Requisitions, Postings, ATS, Interview Scheduling, Offer Letters, Performance Cycles, OKRs, Competencies, Appraisals, 360-Degree Feedback, Training Courses, Cohort Sessions, Enrollments, Professional Certifications, Company Asset Inventory, Custodian Allocations, Offboarding Cases, Multi-Departmental Clearance Checklists, and Exit Interviews (Sprints 01 - 20).
+servers:
+  - url: http://localhost:8080/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate user and issue JWT tokens
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+        "401":
+          description: Invalid credentials.
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh expired access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Token refreshed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current authenticated user profile
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+        "401":
+          description: Unauthenticated.
+  /setup/readiness:
+    get:
+      tags: [Setup]
+      summary: Get Setup module readiness
+      operationId: getSetupReadiness
+      responses:
+        "200":
+          description: Setup readiness state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+  /companies:
+    get:
+      tags: [Setup]
+      summary: List companies
+      operationId: listCompanies
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated company list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Setup]
+      summary: Create company
+      operationId: createCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRequest"
+      responses:
+        "201":
+          description: Company created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /branches:
+    get:
+      tags: [Setup]
+      summary: List branches
+      operationId: listBranches
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated branch list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Setup]
+      summary: Create branch
+      operationId: createBranch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Branch created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  # ================= ORGANIZATION MODULE =================
+  /departments:
+    get:
+      tags: [Organization]
+      summary: List departments
+      operationId: listDepartments
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated department list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Organization]
+      summary: Create department
+      operationId: createDepartment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDepartmentRequest"
+      responses:
+        "201":
+          description: Department created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+  /departments/{id}:
+    get:
+      tags: [Organization]
+      summary: Get department by ID
+      operationId: getDepartment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Department found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Organization]
+      summary: Update department
+      operationId: updateDepartment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Department updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    delete:
+      tags: [Organization]
+      summary: Delete department
+      operationId: deleteDepartment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Department deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /divisions:
+    get:
+      tags: [Organization]
+      summary: List divisions
+      operationId: listDivisions
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated division list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Organization]
+      summary: Create division
+      operationId: createDivision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Division created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /divisions/{id}:
+    delete:
+      tags: [Organization]
+      summary: Delete division
+      operationId: deleteDivision
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Division deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /grades:
+    get:
+      tags: [Organization]
+      summary: List salary grades
+      operationId: listGrades
+      parameters:
+        - name: companyId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Salary grade list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Organization]
+      summary: Create salary grade
+      operationId: createGrade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Salary grade created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /grades/{id}:
+    delete:
+      tags: [Organization]
+      summary: Delete salary grade
+      operationId: deleteGrade
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Salary grade deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /job-levels:
+    get:
+      tags: [Organization]
+      summary: List job levels
+      operationId: listJobLevels
+      parameters:
+        - name: companyId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job level list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Organization]
+      summary: Create job level
+      operationId: createJobLevel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Job level created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /job-levels/{id}:
+    delete:
+      tags: [Organization]
+      summary: Delete job level
+      operationId: deleteJobLevel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job level deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /positions:
+    get:
+      tags: [Organization]
+      summary: List positions
+      operationId: listPositions
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated position list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Organization]
+      summary: Create position
+      operationId: createPosition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Position created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /positions/{id}:
+    delete:
+      tags: [Organization]
+      summary: Delete position
+      operationId: deletePosition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Position deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /organization-units/tree:
+    get:
+      tags: [Organization]
+      summary: Get recursive hierarchical organization tree
+      operationId: getOrganizationTree
+      parameters:
+        - name: companyId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Recursive organization tree.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /organization-units:
+    get:
+      tags: [Organization]
+      summary: Get flat list of active organization units
+      operationId: listOrganizationUnits
+      parameters:
+        - name: companyId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Flat unit list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /organization-units/{id}/parent:
+    put:
+      tags: [Organization]
+      summary: Re-parent organization unit with cycle prevention and change logging
+      operationId: moveUnitParent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [effectiveDate]
+              properties:
+                newParentUnitId:
+                  type: string
+                  format: uuid
+                effectiveDate:
+                  type: string
+                  format: date
+                reason:
+                  type: string
+                  maxLength: 500
+      responses:
+        "200":
+          description: Unit moved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+        "400":
+          description: Cycle detected (ORG_HIERARCHY_CYCLE) or invalid move.
+
+  /organization-units/{id}/history:
+    get:
+      tags: [Organization]
+      summary: Get unit re-parenting audit history
+      operationId: getUnitHistory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Historical change list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /employees:
+    get:
+      tags: [Employee]
+      summary: Search and list employee master records
+      operationId: getEmployees
+      parameters:
+        - name: companyId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: branchId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: departmentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: positionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: List of employees.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Employee]
+      summary: Register new employee master record
+      operationId: createEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmployeeRequest"
+      responses:
+        "201":
+          description: Employee created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /employees/{id}:
+    get:
+      tags: [Employee]
+      summary: Get employee profile details by ID
+      operationId: getEmployeeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Employee summary and assignments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Employee]
+      summary: Update employee assignments and names
+      operationId: updateEmployee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmployeeRequest"
+      responses:
+        "200":
+          description: Employee updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    delete:
+      tags: [Employee]
+      summary: Soft delete employee
+      operationId: deleteEmployee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Employee soft deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /employees/{id}/personal-information:
+    get:
+      tags: [Employee Profile]
+      summary: Get employee sensitive personal identity information
+      operationId: getPersonalInformation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Personal information record.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Employee Profile]
+      summary: Upsert employee sensitive personal identity information
+      operationId: updatePersonalInformation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalInformationRequest"
+      responses:
+        "200":
+          description: Personal information updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /employees/{id}/emergency-contacts:
+    get:
+      tags: [Employee Profile]
+      summary: List employee emergency contacts
+      operationId: getEmergencyContacts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of emergency contacts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Employee Profile]
+      summary: Add emergency contact
+      operationId: createEmergencyContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmergencyContactRequest"
+      responses:
+        "201":
+          description: Emergency contact added.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /employees/{id}/emergency-contacts/{contactId}:
+    delete:
+      tags: [Employee Profile]
+      summary: Remove emergency contact
+      operationId: deleteEmergencyContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Contact removed.
+
+  /employees/{id}/contracts:
+    get:
+      tags: [Employee Lifecycle]
+      summary: List employment contracts
+      operationId: getContracts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of contracts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Employee Lifecycle]
+      summary: Create non-overlapping employment contract
+      operationId: createContract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContractRequest"
+      responses:
+        "201":
+          description: Contract created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /employees/{id}/status-changes:
+    post:
+      tags: [Employee Lifecycle]
+      summary: Transition employee lifecycle status with audit logging
+      operationId: changeEmployeeStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeStatusRequest"
+      responses:
+        "200":
+          description: Status transitioned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /employees/{id}/status-history:
+    get:
+      tags: [Employee Lifecycle]
+      summary: Get employment status audit history trail
+      operationId: getStatusHistory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Historical status transitions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /employees/{id}/documents:
+    get:
+      tags: [Employee Documents]
+      summary: List employee document metadata records
+      operationId: getDocuments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of documents.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Employee Documents]
+      summary: Register employee document record
+      operationId: createDocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDocumentRequest"
+      responses:
+        "201":
+          description: Document registered.
+          content:
+            application/json:
+  /permissions:
+    get:
+      tags: [Governance & RBAC]
+      summary: List all system permissions
+      operationId: listPermissions
+      responses:
+        "200":
+          description: List of permissions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /roles:
+    get:
+      tags: [Governance & RBAC]
+      summary: List all roles with their assigned permissions
+      operationId: listRoles
+      responses:
+        "200":
+          description: List of roles.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Governance & RBAC]
+      summary: Create a custom role
+      operationId: createRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRoleRequest"
+      responses:
+        "201":
+          description: Role created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /roles/{id}:
+    put:
+      tags: [Governance & RBAC]
+      summary: Update role details and permission assignments
+      operationId: updateRole
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRoleRequest"
+      responses:
+        "200":
+          description: Role updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    delete:
+      tags: [Governance & RBAC]
+      summary: Delete a custom role
+      operationId: deleteRole
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Role deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /users:
+    get:
+      tags: [User Governance]
+      summary: List system users with roles and status
+      operationId: listUsers
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Paginated user list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [User Governance]
+      summary: Create user account
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /users/{id}/roles:
+    put:
+      tags: [User Governance]
+      summary: Assign roles to a user
+      operationId: updateUserRoles
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRolesRequest"
+      responses:
+        "200":
+          description: User roles updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /users/{id}/status:
+    put:
+      tags: [User Governance]
+      summary: Update user account status (ACTIVE, SUSPENDED, DEACTIVATED)
+      operationId: updateUserStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserStatusRequest"
+      responses:
+        "200":
+          description: User status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /audit-logs:
+    get:
+      tags: [Audit Trail]
+      summary: Query system audit logs with filters
+      operationId: listAuditLogs
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - name: entityType
+          in: query
+          schema:
+            type: string
+        - name: actorUsername
+          in: query
+          schema:
+            type: string
+        - name: action
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated audit log records.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List user notifications
+      operationId: listNotifications
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Paginated notification records.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: Get unread notification count
+      operationId: getUnreadCount
+      responses:
+        "200":
+          description: Unread notification count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /notifications/{id}/read:
+    put:
+      tags: [Notifications]
+      summary: Mark specific notification as read
+      operationId: markAsRead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Notification marked as read.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /notifications/read-all:
+    put:
+      tags: [Notifications]
+      summary: Mark all notifications as read for current user
+      operationId: markAllAsRead
+      responses:
+        "200":
+          description: All notifications marked as read.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /notification-templates:
+    get:
+      tags: [Notifications]
+      summary: List notification templates
+      operationId: listNotificationTemplates
+      responses:
+        "200":
+          description: Notification template list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /notification-templates/{id}:
+    put:
+      tags: [Notifications]
+      summary: Update notification template
+      operationId: updateNotificationTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTemplateRequest"
+      responses:
+        "200":
+          description: Template updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /shifts:
+    get:
+      tags: [Attendance & Shifts]
+      summary: List all shifts
+      operationId: listShifts
+      responses:
+        "200":
+          description: List of shifts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Attendance & Shifts]
+      summary: Create a new shift schedule
+      operationId: createShift
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftRequest"
+      responses:
+        "201":
+          description: Shift created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /shifts/{id}:
+    get:
+      tags: [Attendance & Shifts]
+      summary: Get shift by ID
+      operationId: getShift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Shift details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Attendance & Shifts]
+      summary: Update shift schedule
+      operationId: updateShift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftRequest"
+      responses:
+        "200":
+          description: Shift updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    delete:
+      tags: [Attendance & Shifts]
+      summary: Delete shift
+      operationId: deleteShift
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Shift deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /shifts/patterns:
+    get:
+      tags: [Attendance & Shifts]
+      summary: List shift patterns
+      operationId: listShiftPatterns
+      responses:
+        "200":
+          description: List of patterns.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Attendance & Shifts]
+      summary: Create shift pattern
+      operationId: createShiftPattern
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftPatternRequest"
+      responses:
+        "201":
+          description: Pattern created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /holidays:
+    get:
+      tags: [Attendance & Shifts]
+      summary: List holidays
+      operationId: listHolidays
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: List of holidays.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Attendance & Shifts]
+      summary: Create holiday
+      operationId: createHoliday
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyHolidayRequest"
+      responses:
+        "201":
+          description: Holiday created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /holidays/{id}:
+    put:
+      tags: [Attendance & Shifts]
+      summary: Update holiday
+      operationId: updateHoliday
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyHolidayRequest"
+      responses:
+        "200":
+          description: Holiday updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    delete:
+      tags: [Attendance & Shifts]
+      summary: Delete holiday
+      operationId: deleteHoliday
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Holiday deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /roster:
+    get:
+      tags: [Attendance & Shifts]
+      summary: Query roster schedule
+      operationId: getRoster
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Roster schedule.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /roster/assign:
+    post:
+      tags: [Attendance & Shifts]
+      summary: Assign roster for employee date
+      operationId: assignRoster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignRosterRequest"
+      responses:
+        "201":
+          description: Roster assigned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /roster/bulk-pattern:
+    post:
+      tags: [Attendance & Shifts]
+      summary: Apply cyclical pattern to employees
+      operationId: bulkPatternRoster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkPatternRosterRequest"
+      responses:
+        "200":
+          description: Pattern applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /roster/{id}:
+    delete:
+      tags: [Attendance & Shifts]
+      summary: Delete roster assignment
+      operationId: deleteRoster
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Assignment deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/clock-in:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Employee web/mobile clock-in punch
+      operationId: clockIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClockInRequest"
+      responses:
+        "201":
+          description: Clock-in recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/clock-out:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Employee web/mobile clock-out punch
+      operationId: clockOut
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClockOutRequest"
+      responses:
+        "200":
+          description: Clock-out recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/my-today:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: Get current employee today's attendance record
+      operationId: getMyTodayAttendance
+      parameters:
+        - name: employeeId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Today's attendance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/records:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: List attendance records with filtering
+      operationId: listAttendanceRecords
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Paginated attendance records.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /attendance/biometrics/import:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Batch import biometric machine punch logs
+      operationId: importBiometricPunches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BiometricPunchImportRequest"
+      responses:
+        "200":
+          description: Punches imported.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/types:
+    get:
+      tags: [Leave Management]
+      summary: List all active leave types and quotas
+      operationId: getLeaveTypes
+      responses:
+        "200":
+          description: List of leave types.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Leave Management]
+      summary: Create a new leave type configuration
+      operationId: createLeaveType
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveTypeRequest"
+      responses:
+        "201":
+          description: Leave type created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/types/{id}:
+    get:
+      tags: [Leave Management]
+      summary: Get leave type by ID
+      operationId: getLeaveTypeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Leave type details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Leave Management]
+      summary: Update leave type configuration
+      operationId: updateLeaveType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveTypeRequest"
+      responses:
+        "200":
+          description: Leave type updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/balances/employee/{employeeId}:
+    get:
+      tags: [Leave Management]
+      summary: Get leave quotas and remaining balances for employee
+      operationId: getEmployeeLeaveBalances
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Employee leave balances.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /leave/balances/adjust:
+    post:
+      tags: [Leave Management]
+      summary: Adjust employee leave quota or carried-over balance
+      operationId: adjustLeaveBalance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveBalanceAdjustRequest"
+      responses:
+        "200":
+          description: Balance adjusted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/requests:
+    get:
+      tags: [Leave Management]
+      summary: List leave requests with filters
+      operationId: getLeaveRequests
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED, CANCELLED]
+      responses:
+        "200":
+          description: Leave requests list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Leave Management]
+      summary: Submit a new leave application
+      operationId: createLeaveRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveRequestCreateRequest"
+      responses:
+        "201":
+          description: Leave request submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/requests/{id}:
+    get:
+      tags: [Leave Management]
+      summary: Get leave request details
+      operationId: getLeaveRequestById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Leave request details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/requests/{id}/cancel:
+    put:
+      tags: [Leave Management]
+      summary: Cancel a pending or approved leave request
+      operationId: cancelLeaveRequest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Leave request cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/requests/calendar:
+    get:
+      tags: [Leave Management]
+      summary: Get approved leave calendar entries
+      operationId: getLeaveCalendar
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Calendar entries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /leave/approvals/inbox:
+    get:
+      tags: [Leave Management]
+      summary: Get manager approval inbox items
+      operationId: getApprovalInbox
+      parameters:
+        - name: approverId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED, CANCELLED]
+      responses:
+        "200":
+          description: Approval inbox list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /leave/approvals/{id}/approve:
+    post:
+      tags: [Leave Management]
+      summary: Approve a leave request step
+      operationId: approveLeave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveApprovalActionRequest"
+      responses:
+        "200":
+          description: Leave request approved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /leave/approvals/{id}/reject:
+    post:
+      tags: [Leave Management]
+      summary: Reject a leave request step
+      operationId: rejectLeave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeaveApprovalActionRequest"
+      responses:
+        "200":
+          description: Leave request rejected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/wfh:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: Get employee WFH requests
+      operationId: getWfhRequests
+      parameters:
+        - name: employeeId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: WFH requests list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Submit a work-from-home request
+      operationId: createWfhRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WfhRequestCreateRequest"
+      responses:
+        "201":
+          description: WFH request submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/wfh/inbox:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: Get manager WFH approval inbox
+      operationId: getWfhInbox
+      parameters:
+        - name: approverId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: WFH approval inbox.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /attendance/wfh/{id}/approve:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Approve WFH request
+      operationId: approveWfh
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WfhActionRequest"
+      responses:
+        "200":
+          description: WFH approved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/wfh/{id}/reject:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Reject WFH request
+      operationId: rejectWfh
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WfhActionRequest"
+      responses:
+        "200":
+          description: WFH rejected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/overtime:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: List overtime requests
+      operationId: getOvertimeRequests
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Overtime requests list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Submit an overtime request
+      operationId: createOvertimeRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OvertimeRequestCreateRequest"
+      responses:
+        "201":
+          description: Overtime request submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/overtime/inbox:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: Get manager overtime approval inbox
+      operationId: getOvertimeInbox
+      parameters:
+        - name: approverId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Overtime approval inbox.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /attendance/overtime/{id}/approve:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Approve overtime request
+      operationId: approveOvertime
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OvertimeActionRequest"
+      responses:
+        "200":
+          description: Overtime approved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/overtime/{id}/reject:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Reject overtime request
+      operationId: rejectOvertime
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OvertimeActionRequest"
+      responses:
+        "200":
+          description: Overtime rejected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/recaps:
+    get:
+      tags: [Attendance & Daily Tracking]
+      summary: Get monthly attendance recaps
+      operationId: getMonthlyRecaps
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Monthly attendance recaps.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /attendance/recaps/generate:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Recalculate and generate monthly attendance recaps
+      operationId: generateMonthlyRecaps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttendanceRecapGenerateRequest"
+      responses:
+        "200":
+          description: Monthly recaps generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /attendance/recaps/{id}/lock:
+    put:
+      tags: [Attendance & Daily Tracking]
+      summary: Lock monthly recap for payroll handoff
+      operationId: lockMonthlyRecap
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: lockedBy
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Recap locked.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /attendance/recaps/lock-period:
+    post:
+      tags: [Attendance & Daily Tracking]
+      summary: Bulk lock all recaps for a month
+      operationId: lockAllPeriodRecaps
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: lockedBy
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Period recaps locked.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/components:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List salary components
+      operationId: getSalaryComponents
+      parameters:
+        - name: activeOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Salary components list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Create a salary component
+      operationId: createSalaryComponent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SalaryComponentCreateRequest"
+      responses:
+        "201":
+          description: Salary component created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/components/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get salary component by ID
+      operationId: getSalaryComponentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Salary component details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Update a salary component
+      operationId: updateSalaryComponent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SalaryComponentUpdateRequest"
+      responses:
+        "200":
+          description: Salary component updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/structures:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List all grade salary structures
+      operationId: getSalaryStructures
+      responses:
+        "200":
+          description: Salary structures list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Create or update grade salary structure
+      operationId: createOrUpdateSalaryStructure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SalaryStructureCreateRequest"
+      responses:
+        "200":
+          description: Salary structure saved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/structures/grade/{gradeId}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get salary structure for a specific job grade
+      operationId: getSalaryStructureByGrade
+      parameters:
+        - name: gradeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Grade salary structure.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/compensation/{employeeId}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get employee compensation and salary profile
+      operationId: getEmployeeCompensation
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Employee salary profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Save or update employee compensation profile
+      operationId: updateEmployeeCompensation
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeSalaryProfileRequest"
+      responses:
+        "200":
+          description: Employee compensation saved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/tax-config/brackets:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List progressive income tax brackets
+      operationId: getTaxBrackets
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tax brackets list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Save or update progressive tax bracket
+      operationId: saveTaxBracket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaxConfigurationRequest"
+      responses:
+        "200":
+          description: Tax bracket saved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/tax-config/ptkp:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List non-taxable relief allowances (PTKP)
+      operationId: getPtkpList
+      responses:
+        "200":
+          description: PTKP list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/tax-config/calculate:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Simulate and calculate progressive PPh 21 tax
+      operationId: calculateTax
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaxCalculationRequest"
+      responses:
+        "200":
+          description: Progressive tax calculation result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/periods:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List all payroll periods
+      operationId: getPayrollPeriods
+      responses:
+        "200":
+          description: Payroll periods list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Create a new payroll period
+      operationId: createPayrollPeriod
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayrollPeriodCreateRequest"
+      responses:
+        "201":
+          description: Payroll period created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/periods/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get payroll period by ID
+      operationId: getPayrollPeriodById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payroll period details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/periods/{id}/status:
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Update payroll period status
+      operationId: updatePayrollPeriodStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayrollPeriodStatusUpdateRequest"
+      responses:
+        "200":
+          description: Status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/periods/{periodId}/attendance:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get attendance cutoffs for payroll period
+      operationId: getPeriodAttendanceCutoffs
+      parameters:
+        - name: periodId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Attendance cutoffs list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/periods/{periodId}/attendance/ingest:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Ingest locked attendance recaps into period
+      operationId: ingestPeriodAttendance
+      parameters:
+        - name: periodId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Attendance ingested.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/periods/{periodId}/simulation:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get simulations for payroll period
+      operationId: getPeriodSimulations
+      parameters:
+        - name: periodId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Simulations list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/periods/{periodId}/simulation/simulate:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Run calculation simulation for payroll period
+      operationId: simulatePayrollPeriod
+      parameters:
+        - name: periodId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Simulation results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/runs:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List all payroll batch runs
+      operationId: getPayrollRuns
+      responses:
+        "200":
+          description: Payroll runs list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/runs/execute:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Execute atomic batch payroll run for period
+      operationId: executePayrollRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PayrollRunExecutionRequest"
+      responses:
+        "201":
+          description: Payroll run executed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/runs/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get payroll run by ID
+      operationId: getPayrollRunById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payroll run details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/runs/{id}/items:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get payslip items for a payroll run
+      operationId: getPayrollRunItems
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payroll run items list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+
+  /payroll/runs/{id}/freeze:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Freeze payroll run to prevent further modification
+      operationId: freezePayrollRun
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payroll run frozen.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/loans:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List employee cash loans
+      operationId: getEmployeeLoans
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Employee loans list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Issue a new employee cash loan with monthly installment plan
+      operationId: createEmployeeLoan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeLoanCreateRequest"
+      responses:
+        "201":
+          description: Employee loan issued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/loans/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get employee loan by ID
+      operationId: getEmployeeLoanById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Employee loan details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/reimbursements:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List expense reimbursement claims
+      operationId: getEmployeeReimbursements
+      parameters:
+        - name: employeeId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reimbursements list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiListResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Submit employee expense reimbursement claim
+      operationId: submitEmployeeReimbursement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeReimbursementCreateRequest"
+      responses:
+        "201":
+          description: Reimbursement submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/reimbursements/{id}/approve:
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Approve expense reimbursement claim
+      operationId: approveEmployeeReimbursement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Claim approved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/reimbursements/{id}/reject:
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Reject expense reimbursement claim
+      operationId: rejectEmployeeReimbursement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Claim rejected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/payslips/generate/{payrollRunId}:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Generate payslips for a payroll run
+      operationId: generatePayslips
+      parameters:
+        - name: payrollRunId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payslips generated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/payslips:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List payslips with optional employee filter
+      operationId: getPayslips
+      parameters:
+        - name: employeeId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of payslips.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/payslips/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get payslip detail
+      operationId: getPayslipDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payslip details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/payslips/publish/{payrollRunId}:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Publish payslips to employee self-service portal
+      operationId: publishPayslips
+      parameters:
+        - name: payrollRunId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payslips published.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/disbursals/generate:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Generate bank transfer disbursal batch file
+      operationId: generateDisbursalBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [payrollRunId, bankFormat]
+              properties:
+                payrollRunId:
+                  type: string
+                  format: uuid
+                bankFormat:
+                  type: string
+                  enum: [BCA, MANDIRI, BRI, BNI, PERMATA, GENERIC_CSV]
+      responses:
+        "200":
+          description: Disbursal batch generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/disbursals:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List all bank disbursal batches
+      operationId: getDisbursalBatches
+      responses:
+        "200":
+          description: List of disbursal batches.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/disbursals/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get disbursal batch detail
+      operationId: getDisbursalBatchDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Disbursal batch detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/disbursals/{id}/items:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get disbursal batch items
+      operationId: getDisbursalBatchItems
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Disbursal batch items.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/disbursals/{id}/status:
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Update disbursal batch status
+      operationId: updateDisbursalStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+      responses:
+        "200":
+          description: Disbursal status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/bpjs:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List all statutory BPJS configurations
+      operationId: getBpjsConfigurations
+      responses:
+        "200":
+          description: List of BPJS configurations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/bpjs/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get BPJS configuration detail
+      operationId: getBpjsConfigurationDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: BPJS configuration detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Update BPJS configuration rates and wage limits
+      operationId: updateBpjsConfiguration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [employerRate, employeeRate]
+              properties:
+                employerRate:
+                  type: number
+                employeeRate:
+                  type: number
+                wageCeiling:
+                  type: number
+                wageFloor:
+                  type: number
+      responses:
+        "200":
+          description: BPJS configuration updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/bpjs/enrollments:
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Enroll employee in statutory BPJS schemes
+      operationId: enrollEmployeeBpjs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [employeeId]
+              properties:
+                employeeId:
+                  type: string
+                  format: uuid
+                bpjsKesNumber:
+                  type: string
+                bpjsTkNumber:
+                  type: string
+                jkkRiskGrade:
+                  type: integer
+      responses:
+        "201":
+          description: BPJS enrollment saved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/bpjs/enrollments/{employeeId}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get employee BPJS enrollment details
+      operationId: getEmployeeBpjsEnrollment
+      parameters:
+        - name: employeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: BPJS enrollment details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/bpjs/calculate:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Calculate BPJS statutory contribution breakdown
+      operationId: calculateBpjs
+      parameters:
+        - name: baseWage
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: jkkRiskGrade
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: BPJS calculation breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/benefits/plans:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List all corporate benefit plans
+      operationId: getBenefitPlans
+      parameters:
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of benefit plans.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Create new benefit plan
+      operationId: createBenefitPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, name, category, annualLimit]
+              properties:
+                code:
+                  type: string
+                name:
+                  type: string
+                category:
+                  type: string
+                annualLimit:
+                  type: number
+                description:
+                  type: string
+      responses:
+        "201":
+          description: Benefit plan created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/benefits/plans/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get benefit plan detail
+      operationId: getBenefitPlanDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Benefit plan detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Update benefit plan
+      operationId: updateBenefitPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                category:
+                  type: string
+                annualLimit:
+                  type: number
+                description:
+                  type: string
+      responses:
+        "200":
+          description: Benefit plan updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/benefits/claims:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: List benefit reimbursement claims
+      operationId: getBenefitClaims
+      parameters:
+        - name: employeeId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of claims.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Compensation & Payroll Engine]
+      summary: Submit a benefit reimbursement claim
+      operationId: submitBenefitClaim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [employeeId, benefitPlanId, claimDate, amount, description]
+              properties:
+                employeeId:
+                  type: string
+                  format: uuid
+                benefitPlanId:
+                  type: string
+                  format: uuid
+                claimDate:
+                  type: string
+                  format: date
+                amount:
+                  type: number
+                description:
+                  type: string
+                receiptUrl:
+                  type: string
+      responses:
+        "201":
+          description: Claim submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/benefits/claims/{id}:
+    get:
+      tags: [Compensation & Payroll Engine]
+      summary: Get benefit claim detail
+      operationId: getBenefitClaimDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Claim detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /payroll/benefits/claims/{id}/status:
+    put:
+      tags: [Compensation & Payroll Engine]
+      summary: Approve or reject benefit claim
+      operationId: updateBenefitClaimStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                reviewerId:
+                  type: string
+                  format: uuid
+                rejectionReason:
+                  type: string
+      responses:
+        "200":
+          description: Claim status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/requisitions:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List job headcount requisitions
+      operationId: getJobRequisitions
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: departmentId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of job requisitions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Create new job requisition
+      operationId: createJobRequisition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, headcount]
+              properties:
+                title:
+                  type: string
+                departmentId:
+                  type: string
+                  format: uuid
+                positionId:
+                  type: string
+                  format: uuid
+                headcount:
+                  type: integer
+                employmentType:
+                  type: string
+                minSalary:
+                  type: number
+                maxSalary:
+                  type: number
+                justification:
+                  type: string
+      responses:
+        "201":
+          description: Job requisition created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/requisitions/{id}:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Get job requisition detail
+      operationId: getJobRequisitionDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Requisition detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/requisitions/{id}/submit:
+    put:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Submit requisition for management approval
+      operationId: submitJobRequisition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Requisition submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/requisitions/{id}/approve:
+    put:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Approve headcount requisition
+      operationId: approveJobRequisition
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approverId:
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: Requisition approved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/postings:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List public or internal job postings
+      operationId: getJobPostings
+      parameters:
+        - name: publishedOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of job postings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Create job posting from approved requisition
+      operationId: createJobPosting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requisitionId, postingTitle, description]
+              properties:
+                requisitionId:
+                  type: string
+                  format: uuid
+                postingTitle:
+                  type: string
+                description:
+                  type: string
+                requirements:
+                  type: string
+                location:
+                  type: string
+                isPublished:
+                  type: boolean
+                closingDate:
+                  type: string
+                  format: date
+      responses:
+        "201":
+          description: Job posting created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/postings/{id}:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Get job posting detail
+      operationId: getJobPostingDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job posting detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/postings/{id}/publish:
+    put:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Toggle job posting publication status
+      operationId: publishJobPosting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                publish:
+                  type: boolean
+      responses:
+        "200":
+          description: Posting publication updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/candidates:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List candidate pool
+      operationId: getCandidates
+      responses:
+        "200":
+          description: List of candidates.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Register candidate profile
+      operationId: registerCandidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, email]
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                resumeUrl:
+                  type: string
+                linkedinUrl:
+                  type: string
+      responses:
+        "201":
+          description: Candidate registered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/candidates/{id}:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Get candidate profile detail
+      operationId: getCandidateDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Candidate profile detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/applications:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List applicant submissions across recruitment pipeline
+      operationId: getJobApplications
+      parameters:
+        - name: postingId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: stage
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of applications.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Submit candidate application to job opening
+      operationId: applyJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobPostingId, candidateId]
+              properties:
+                jobPostingId:
+                  type: string
+                  format: uuid
+                candidateId:
+                  type: string
+                  format: uuid
+                notes:
+                  type: string
+      responses:
+        "201":
+          description: Application submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/applications/{id}:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Get application detail
+      operationId: getJobApplicationDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Application detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/applications/{id}/stage:
+    put:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Update candidate stage in ATS pipeline
+      operationId: updateApplicationStage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [stage]
+              properties:
+                stage:
+                  type: string
+                  enum: [APPLIED, SCREENING, INTERVIEW, OFFERED, HIRED, REJECTED]
+                rating:
+                  type: integer
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Application stage updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/interviews:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List interview schedules
+      operationId: getInterviews
+      parameters:
+        - name: applicationId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of interview schedules retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Schedule interview round
+      operationId: scheduleInterview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applicationId, roundName, scheduledTime]
+              properties:
+                applicationId:
+                  type: string
+                  format: uuid
+                roundName:
+                  type: string
+                scheduledTime:
+                  type: string
+                  format: date-time
+                durationMinutes:
+                  type: integer
+                  default: 60
+                interviewerId:
+                  type: string
+                  format: uuid
+                locationUrl:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        "201":
+          description: Interview scheduled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/interviews/{id}:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Get interview schedule details
+      operationId: getInterviewById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Interview schedule retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/interviews/{id}/evaluations:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List candidate evaluations for interview
+      operationId: getInterviewEvaluations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Evaluations retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Submit scorecard and evaluation for interview
+      operationId: submitInterviewEvaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [score, verdict]
+              properties:
+                interviewerId:
+                  type: string
+                  format: uuid
+                score:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                verdict:
+                  type: string
+                feedbackNotes:
+                  type: string
+      responses:
+        "201":
+          description: Evaluation submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/offers:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: List job offers
+      operationId: getJobOffers
+      parameters:
+        - name: applicationId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job offers retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Create formal job offer
+      operationId: createJobOffer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [applicationId, offeredSalary, joinDate, expirationDate]
+              properties:
+                applicationId:
+                  type: string
+                  format: uuid
+                offeredSalary:
+                  type: number
+                allowanceAmount:
+                  type: number
+                joinDate:
+                  type: string
+                  format: date
+                expirationDate:
+                  type: string
+                  format: date
+                letterUrl:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        "201":
+          description: Job offer created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/offers/{id}:
+    get:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Get job offer by ID
+      operationId: getJobOfferById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job offer retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /recruitment/offers/{id}/status:
+    patch:
+      tags: [Recruitment & Talent Acquisition]
+      summary: Update job offer status (SENT, ACCEPTED, DECLINED, EXPIRED)
+      operationId: updateJobOfferStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [DRAFT, SENT, ACCEPTED, DECLINED, EXPIRED]
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Offer status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/cycles:
+    get:
+      tags: [Performance & Goal Management]
+      summary: List performance review cycles
+      operationId: getPerformanceCycles
+      parameters:
+        - name: companyId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Performance cycles retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Performance & Goal Management]
+      summary: Create performance review cycle
+      operationId: createPerformanceCycle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [companyId, name, cycleType, startDate, endDate, selfReviewDeadline, managerReviewDeadline]
+              properties:
+                companyId:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                cycleType:
+                  type: string
+                  enum: [ANNUAL, SEMI_ANNUAL, QUARTERLY]
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                selfReviewDeadline:
+                  type: string
+                  format: date
+                managerReviewDeadline:
+                  type: string
+                  format: date
+      responses:
+        "201":
+          description: Cycle created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/cycles/{id}:
+    get:
+      tags: [Performance & Goal Management]
+      summary: Get performance review cycle by ID
+      operationId: getPerformanceCycleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Cycle details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/cycles/{id}/status:
+    patch:
+      tags: [Performance & Goal Management]
+      summary: Update performance review cycle status
+      operationId: updatePerformanceCycleStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [PLANNED, ACTIVE, EVALUATION, CLOSED]
+      responses:
+        "200":
+          description: Cycle status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/goals:
+    get:
+      tags: [Performance & Goal Management]
+      summary: List performance goals and OKRs
+      operationId: getPerformanceGoals
+      parameters:
+        - name: cycleId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: employeeId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Goals retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Performance & Goal Management]
+      summary: Create performance goal or OKR
+      operationId: createPerformanceGoal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cycleId, employeeId, title]
+              properties:
+                cycleId:
+                  type: string
+                  format: uuid
+                employeeId:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                  enum: [INDIVIDUAL, DEPARTMENT, COMPANY]
+                weight:
+                  type: integer
+                keyResults:
+                  type: array
+                  items:
+                    type: object
+                    required: [description, targetValue]
+                    properties:
+                      description:
+                        type: string
+                      metricType:
+                        type: string
+                        enum: [PERCENTAGE, NUMBER, CURRENCY, BOOLEAN]
+                      targetValue:
+                        type: number
+                      currentValue:
+                        type: number
+                      notes:
+                        type: string
+      responses:
+        "201":
+          description: Goal created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/goals/{id}:
+    get:
+      tags: [Performance & Goal Management]
+      summary: Get performance goal by ID
+      operationId: getPerformanceGoalById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Goal retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/goals/{id}/key-results/{krId}/progress:
+    put:
+      tags: [Performance & Goal Management]
+      summary: Update key result achieved progress
+      operationId: updateKeyResultProgress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: krId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentValue]
+              properties:
+                currentValue:
+                  type: number
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Progress recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/competencies:
+    get:
+      tags: [Performance & Goal Management]
+      summary: List competency standards
+      operationId: getCompetencies
+      parameters:
+        - name: companyId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Competencies retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Performance & Goal Management]
+      summary: Create competency standard
+      operationId: createCompetency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [companyId, code, name]
+              properties:
+                companyId:
+                  type: string
+                  format: uuid
+                code:
+                  type: string
+                name:
+                  type: string
+                category:
+                  type: string
+                  enum: [CORE, FUNCTIONAL, LEADERSHIP]
+                description:
+                  type: string
+                weight:
+                  type: integer
+      responses:
+        "201":
+          description: Competency created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/competencies/{id}:
+    get:
+      tags: [Performance & Goal Management]
+      summary: Get competency by ID
+      operationId: getCompetencyById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Competency details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/appraisals:
+    get:
+      tags: [Performance & Goal Management]
+      summary: List employee appraisals
+      operationId: getAppraisals
+      parameters:
+        - name: cycleId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: employeeId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Appraisals retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Performance & Goal Management]
+      summary: Initiate employee appraisal
+      operationId: initiateAppraisal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cycleId, employeeId]
+              properties:
+                cycleId:
+                  type: string
+                  format: uuid
+                employeeId:
+                  type: string
+                  format: uuid
+                managerId:
+                  type: string
+                  format: uuid
+      responses:
+        "201":
+          description: Appraisal initiated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/appraisals/{id}:
+    get:
+      tags: [Performance & Goal Management]
+      summary: Get appraisal by ID
+      operationId: getAppraisalById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Appraisal details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/appraisals/{id}/submit-self:
+    put:
+      tags: [Performance & Goal Management]
+      summary: Submit employee self-review
+      operationId: submitSelfReview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [selfScore]
+              properties:
+                selfScore:
+                  type: number
+                  minimum: 1.0
+                  maximum: 5.0
+                selfComments:
+                  type: string
+      responses:
+        "200":
+          description: Self-review submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/appraisals/{id}/submit-manager:
+    put:
+      tags: [Performance & Goal Management]
+      summary: Submit manager evaluation and finalize score
+      operationId: submitManagerReview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [managerScore]
+              properties:
+                managerScore:
+                  type: number
+                  minimum: 1.0
+                  maximum: 5.0
+                managerComments:
+                  type: string
+      responses:
+        "200":
+          description: Manager review submitted and appraisal finalized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/feedback:
+    get:
+      tags: [Performance & Goal Management]
+      summary: List 360 peer feedback records
+      operationId: getFeedbacks
+      parameters:
+        - name: appraisalId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: reviewerId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Feedback records retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/feedback/request:
+    post:
+      tags: [Performance & Goal Management]
+      summary: Request 360 feedback from a peer
+      operationId: requestFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [appraisalId, reviewerId]
+              properties:
+                appraisalId:
+                  type: string
+                  format: uuid
+                reviewerId:
+                  type: string
+                  format: uuid
+                relationship:
+                  type: string
+                  enum: [PEER, SUBORDINATE, CROSS_FUNCTIONAL]
+                isAnonymous:
+                  type: boolean
+                  default: true
+      responses:
+        "201":
+          description: Feedback request created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/feedback/{id}:
+    get:
+      tags: [Performance & Goal Management]
+      summary: Get 360 feedback by ID
+      operationId: getFeedbackById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Feedback record retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /performance/feedback/{id}/respond:
+    post:
+      tags: [Performance & Goal Management]
+      summary: Submit 360 peer review feedback
+      operationId: submitFeedbackResponse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rating]
+              properties:
+                rating:
+                  type: number
+                  minimum: 1.0
+                  maximum: 5.0
+                feedbackText:
+                  type: string
+      responses:
+        "200":
+          description: Feedback submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/courses:
+    get:
+      tags: [Training]
+      summary: List training courses
+      operationId: getTrainingCourses
+      parameters:
+        - in: query
+          name: companyId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Training courses list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Training]
+      summary: Create training course
+      operationId: createTrainingCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingCourseCreateRequest"
+      responses:
+        "201":
+          description: Course created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/courses/{id}:
+    get:
+      tags: [Training]
+      summary: Get course by ID
+      operationId: getTrainingCourseById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Course details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/sessions:
+    get:
+      tags: [Training]
+      summary: List training sessions
+      operationId: getTrainingSessions
+      parameters:
+        - in: query
+          name: courseId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sessions list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Training]
+      summary: Schedule training session
+      operationId: createTrainingSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingSessionCreateRequest"
+      responses:
+        "201":
+          description: Session scheduled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/sessions/{id}:
+    get:
+      tags: [Training]
+      summary: Get session by ID
+      operationId: getTrainingSessionById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Session details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/sessions/{id}/status:
+    patch:
+      tags: [Training]
+      summary: Update session status
+      operationId: updateTrainingSessionStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/enrollments:
+    get:
+      tags: [Training]
+      summary: List session enrollments
+      operationId: getTrainingEnrollments
+      parameters:
+        - in: query
+          name: sessionId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Enrollments list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Training]
+      summary: Enroll employee in session
+      operationId: enrollEmployeeInSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainingEnrollmentCreateRequest"
+      responses:
+        "201":
+          description: Enrollment created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/enrollments/{id}:
+    get:
+      tags: [Training]
+      summary: Get enrollment by ID
+      operationId: getTrainingEnrollmentById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Enrollment details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/enrollments/{id}/status:
+    put:
+      tags: [Training]
+      summary: Update enrollment status and score
+      operationId: updateTrainingEnrollmentStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnrollmentStatusUpdateRequest"
+      responses:
+        "200":
+          description: Enrollment updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/certifications:
+    get:
+      tags: [Training]
+      summary: List employee certifications
+      operationId: getEmployeeCertifications
+      parameters:
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Certifications list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Training]
+      summary: Add employee certification
+      operationId: createEmployeeCertification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeCertificationCreateRequest"
+      responses:
+        "201":
+          description: Certification recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /training/certifications/{id}:
+    get:
+      tags: [Training]
+      summary: Get certification by ID
+      operationId: getEmployeeCertificationById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Certification details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    delete:
+      tags: [Training]
+      summary: Delete employee certification
+      operationId: deleteEmployeeCertification
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Certification deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/categories:
+    get:
+      tags: [Assets]
+      summary: List asset categories
+      operationId: getAssetCategories
+      parameters:
+        - in: query
+          name: companyId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Categories list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Assets]
+      summary: Create asset category
+      operationId: createAssetCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetCategoryCreateRequest"
+      responses:
+        "201":
+          description: Category created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/categories/{id}:
+    get:
+      tags: [Assets]
+      summary: Get category by ID
+      operationId: getAssetCategoryById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Category details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets:
+    get:
+      tags: [Assets]
+      summary: List company assets
+      operationId: getCompanyAssets
+      parameters:
+        - in: query
+          name: companyId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Assets list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Assets]
+      summary: Register company asset
+      operationId: createCompanyAsset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyAssetCreateRequest"
+      responses:
+        "201":
+          description: Asset registered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/{id}:
+    get:
+      tags: [Assets]
+      summary: Get asset by ID
+      operationId: getCompanyAssetById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Asset details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/{id}/status:
+    patch:
+      tags: [Assets]
+      summary: Update asset status and condition
+      operationId: updateCompanyAssetStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: conditionGrade
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Asset status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/allocations:
+    get:
+      tags: [Assets]
+      summary: List asset allocations
+      operationId: getAssetAllocations
+      parameters:
+        - in: query
+          name: assetId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Allocations list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Assets]
+      summary: Allocate asset to employee
+      operationId: allocateAssetToEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetAllocationCreateRequest"
+      responses:
+        "201":
+          description: Asset allocated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/allocations/{id}:
+    get:
+      tags: [Assets]
+      summary: Get allocation by ID
+      operationId: getAssetAllocationById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Allocation details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /assets/allocations/{id}/return:
+    put:
+      tags: [Assets]
+      summary: Process asset return
+      operationId: returnAssetAllocation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetReturnRequest"
+      responses:
+        "200":
+          description: Asset returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/cases:
+    get:
+      tags: [Offboarding]
+      summary: List offboarding cases
+      operationId: getOffboardingCases
+      parameters:
+        - in: query
+          name: employeeId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Offboarding cases list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+    post:
+      tags: [Offboarding]
+      summary: Initiate employee offboarding case
+      operationId: createOffboardingCase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OffboardingCaseCreateRequest"
+      responses:
+        "201":
+          description: Case created and clearance tasks auto-seeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/cases/{id}:
+    get:
+      tags: [Offboarding]
+      summary: Get offboarding case by ID
+      operationId: getOffboardingCaseById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Case details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/cases/{id}/cancel:
+    patch:
+      tags: [Offboarding]
+      summary: Cancel offboarding case
+      operationId: cancelOffboardingCase
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Case cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/checklists/{caseId}:
+    get:
+      tags: [Offboarding]
+      summary: Get clearance checklists for an offboarding case
+      operationId: getOffboardingChecklists
+      parameters:
+        - in: path
+          name: caseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Checklist items list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/checklists/{id}/clear:
+    put:
+      tags: [Offboarding]
+      summary: Sign off and clear a checklist task
+      operationId: clearOffboardingChecklistItem
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChecklistClearRequest"
+      responses:
+        "200":
+          description: Item cleared. If all items cleared, case becomes COMPLETED and employee TERMINATED.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/exit-interviews:
+    post:
+      tags: [Offboarding]
+      summary: Submit structured exit interview
+      operationId: submitExitInterview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExitInterviewCreateRequest"
+      responses:
+        "201":
+          description: Exit interview recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+  /offboarding/exit-interviews/{caseId}:
+    get:
+      tags: [Offboarding]
+      summary: Get exit interview for a case
+      operationId: getExitInterviewByCaseId
+      parameters:
+        - in: path
+          name: caseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Exit interview details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiObjectResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+  responses:
+    ValidationError:
+      description: Validation failed.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiErrorResponse"
+  schemas:
+    ApiObjectResponse:
+      type: object
+      required: [success, data, message, meta]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+        message:
+          type: string
+        meta:
+          type: object
+    ApiListResponse:
+      type: object
+      required: [success, data, message, meta]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            type: object
+        message:
+          type: string
+        meta:
+          type: object
+    ApiErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          const: false
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+    LoginRequest:
+      type: object
+      required: [usernameOrEmail, password]
+      properties:
+        usernameOrEmail:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: Admin@123456
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    CreateCompanyRequest:
+      type: object
+      required: [code, name, legalName, defaultLocale, timezone]
+      properties:
+        code:
+          type: string
+          minLength: 2
+          maxLength: 30
+        name:
+          type: string
+          maxLength: 150
+        legalName:
+          type: string
+          maxLength: 200
+        defaultLocale:
+          type: string
+          example: en-US
+        timezone:
+          type: string
+          example: Asia/Jakarta
+    CreateDepartmentRequest:
+      type: object
+      required: [companyId, code, name]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          maxLength: 30
+        name:
+          type: string
+          maxLength: 150
+    CreateEmployeeRequest:
+      type: object
+      required: [companyId, branchId, employeeNumber, firstName]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        branchId:
+          type: string
+          format: uuid
+        departmentId:
+          type: string
+          format: uuid
+        divisionId:
+          type: string
+          format: uuid
+        positionId:
+          type: string
+          format: uuid
+        gradeId:
+          type: string
+          format: uuid
+        jobLevelId:
+          type: string
+          format: uuid
+        employeeNumber:
+          type: string
+          maxLength: 50
+          example: EMP-001
+        firstName:
+          type: string
+          maxLength: 100
+          example: John
+        lastName:
+          type: string
+          maxLength: 100
+          example: Doe
+        workEmail:
+          type: string
+          format: email
+          example: john.doe@company.com
+        employmentStatus:
+          type: string
+          enum: [CANDIDATE, PROBATION, ACTIVE, SUSPENDED, TERMINATED]
+          default: CANDIDATE
+        hireDate:
+          type: string
+          format: date
+          example: "2026-10-15"
+    UpdateEmployeeRequest:
+      type: object
+      required: [branchId, firstName]
+      properties:
+        branchId:
+          type: string
+          format: uuid
+        departmentId:
+          type: string
+          format: uuid
+        divisionId:
+          type: string
+          format: uuid
+        positionId:
+          type: string
+          format: uuid
+        gradeId:
+          type: string
+          format: uuid
+        jobLevelId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+          maxLength: 100
+        lastName:
+          type: string
+          maxLength: 100
+        workEmail:
+          type: string
+          format: email
+        hireDate:
+          type: string
+          format: date
+    ChangeStatusRequest:
+      type: object
+      required: [newStatus, effectiveDate]
+      properties:
+        newStatus:
+          type: string
+          enum: [CANDIDATE, PROBATION, ACTIVE, SUSPENDED, TERMINATED]
+        effectiveDate:
+          type: string
+          format: date
+          example: "2026-10-15"
+        reason:
+          type: string
+          maxLength: 255
+    PersonalInformationRequest:
+      type: object
+      properties:
+        birthDate:
+          type: string
+          format: date
+        birthPlace:
+          type: string
+          maxLength: 100
+        gender:
+          type: string
+          maxLength: 20
+        maritalStatus:
+          type: string
+          maxLength: 30
+        nationality:
+          type: string
+          maxLength: 50
+        identityNumber:
+          type: string
+          maxLength: 50
+          example: "3171012345670001"
+        taxNumber:
+          type: string
+          maxLength: 50
+          example: "01.234.567.8-012.000"
+        personalEmail:
+          type: string
+          format: email
+        personalPhone:
+          type: string
+          maxLength: 30
+        address:
+          type: string
+    CreateEmergencyContactRequest:
+      type: object
+      required: [name, relationship, phone]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        relationship:
+          type: string
+          maxLength: 50
+        phone:
+          type: string
+          maxLength: 30
+        email:
+          type: string
+          format: email
+        primaryContact:
+          type: boolean
+          default: false
+    CreateContractRequest:
+      type: object
+      required: [contractType, startDate]
+      properties:
+        contractType:
+          type: string
+          enum: [PERMANENT, FIXED_TERM, INTERNSHIP, CONSULTANT]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+          default: ACTIVE
+        documentId:
+          type: string
+          format: uuid
+    CreateDocumentRequest:
+      type: object
+      required: [documentType, fileName]
+      properties:
+        documentType:
+          type: string
+          maxLength: 50
+        fileName:
+          type: string
+          maxLength: 255
+        storageReference:
+          type: string
+          maxLength: 500
+        accessClassification:
+          type: string
+          enum: [PUBLIC, INTERNAL, RESTRICTED, CONFIDENTIAL]
+          default: RESTRICTED
+        retentionCategory:
+          type: string
+          maxLength: 50
+          default: PERMANENT
+        expiresAt:
+          type: string
+          format: date
+        status:
+          type: string
+          default: ACTIVE
+    CreateRoleRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z0-9_]+$"
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 255
+        permissionCodes:
+          type: array
+          items:
+            type: string
+    UpdateRoleRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 255
+        permissionCodes:
+          type: array
+          items:
+            type: string
+    CreateUserRequest:
+      type: object
+      required: [username, password, displayName, email]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+        displayName:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        roleCodes:
+          type: array
+          items:
+            type: string
+    UpdateUserRolesRequest:
+      type: object
+      required: [roleCodes]
+      properties:
+        roleCodes:
+          type: array
+          items:
+            type: string
+    UpdateUserStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, DEACTIVATED]
+    UpdateTemplateRequest:
+      type: object
+      required: [subjectTemplate, bodyTemplate, isActive]
+      properties:
+        subjectTemplate:
+          type: string
+          maxLength: 200
+        bodyTemplate:
+          type: string
+        isActive:
+          type: boolean
+    ShiftRequest:
+      type: object
+      required: [code, name, startTime, endTime]
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z0-9_]+$"
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 255
+        startTime:
+          type: string
+          example: "08:00:00"
+        endTime:
+          type: string
+          example: "17:00:00"
+        breakMinutes:
+          type: integer
+          default: 60
+        gracePeriodMinutes:
+          type: integer
+          default: 15
+        isOvernight:
+          type: boolean
+          default: false
+        isActive:
+          type: boolean
+          default: true
+    ShiftPatternRequest:
+      type: object
+      required: [code, name, patternSequence]
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z0-9_]+$"
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 255
+        patternSequence:
+          type: string
+          maxLength: 500
+        cycleDays:
+          type: integer
+          default: 7
+        isActive:
+          type: boolean
+          default: true
+    CompanyHolidayRequest:
+      type: object
+      required: [holidayDate, name]
+      properties:
+        holidayDate:
+          type: string
+          format: date
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 255
+        companyId:
+          type: string
+          format: uuid
+        branchId:
+          type: string
+          format: uuid
+        isMandatory:
+          type: boolean
+          default: true
+    AssignRosterRequest:
+      type: object
+      required: [employeeId, shiftDate]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        shiftId:
+          type: string
+          format: uuid
+        shiftDate:
+          type: string
+          format: date
+        isDayOff:
+          type: boolean
+          default: false
+        overrideReason:
+          type: string
+          maxLength: 255
+    BulkPatternRosterRequest:
+      type: object
+      required: [employeeIds, patternId, startDate, endDate]
+      properties:
+        employeeIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        patternId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    ClockInRequest:
+      type: object
+      required: [employeeId]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        latitude:
+          type: number
+        longitude:
+          type: number
+        ipAddress:
+          type: string
+        deviceInfo:
+          type: string
+        notes:
+          type: string
+    ClockOutRequest:
+      type: object
+      required: [employeeId]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        latitude:
+          type: number
+        longitude:
+          type: number
+        ipAddress:
+          type: string
+        deviceInfo:
+          type: string
+        notes:
+          type: string
+    BiometricPunchImportRequest:
+      type: object
+      required: [deviceCode, punches]
+      properties:
+        deviceCode:
+          type: string
+        punches:
+          type: array
+          items:
+            type: object
+            required: [employeeNumber, punchTime, punchType]
+            properties:
+              employeeNumber:
+                type: string
+              punchTime:
+                type: string
+                format: date-time
+              punchType:
+                type: string
+                enum: [CLOCK_IN, CLOCK_OUT]
+    LeaveTypeRequest:
+      type: object
+      required: [code, name, defaultQuota]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        defaultQuota:
+          type: integer
+        isPaid:
+          type: boolean
+          default: true
+        requiresAttachment:
+          type: boolean
+          default: false
+        maxConsecutiveDays:
+          type: integer
+          default: 30
+        carryForwardAllowed:
+          type: boolean
+          default: false
+        maxCarryForward:
+          type: integer
+          default: 0
+        isActive:
+          type: boolean
+          default: true
+    LeaveBalanceAdjustRequest:
+      type: object
+      required: [employeeId, leaveTypeId, year, totalQuota]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        leaveTypeId:
+          type: string
+          format: uuid
+        year:
+          type: integer
+        totalQuota:
+          type: integer
+        carriedOver:
+          type: integer
+          default: 0
+    LeaveRequestCreateRequest:
+      type: object
+      required: [leaveTypeId, startDate, endDate, reason]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        leaveTypeId:
+          type: string
+          format: uuid
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        reason:
+          type: string
+        attachmentUrl:
+          type: string
+        approverId:
+          type: string
+          format: uuid
+    LeaveApprovalActionRequest:
+      type: object
+      properties:
+        comments:
+          type: string
+    WfhRequestCreateRequest:
+      type: object
+      required: [employeeId, date, reason]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        reason:
+          type: string
+        approverId:
+          type: string
+          format: uuid
+    WfhActionRequest:
+      type: object
+      properties:
+        comments:
+          type: string
+    OvertimeRequestCreateRequest:
+      type: object
+      required: [employeeId, date, startTime, endTime, reason]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+        isHoliday:
+          type: boolean
+          default: false
+        reason:
+          type: string
+        approverId:
+          type: string
+          format: uuid
+    OvertimeActionRequest:
+      type: object
+      properties:
+        comments:
+          type: string
+    AttendanceRecapGenerateRequest:
+      type: object
+      required: [periodYear, periodMonth]
+      properties:
+        periodYear:
+          type: integer
+        periodMonth:
+          type: integer
+    SalaryComponentCreateRequest:
+      type: object
+      required: [code, name, type]
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [EARNING_FIXED, EARNING_VARIABLE, DEDUCTION_FIXED, DEDUCTION_VARIABLE, BENEFIT_IN_KIND]
+        isTaxable:
+          type: boolean
+          default: true
+        isBpjsApplicable:
+          type: boolean
+          default: true
+        defaultAmount:
+          type: number
+          default: 0
+    SalaryComponentUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        isTaxable:
+          type: boolean
+        isBpjsApplicable:
+          type: boolean
+        defaultAmount:
+          type: number
+        isActive:
+          type: boolean
+    SalaryStructureCreateRequest:
+      type: object
+      required: [gradeId, minSalary, midpointSalary, maxSalary]
+      properties:
+        gradeId:
+          type: string
+          format: uuid
+        minSalary:
+          type: number
+        midpointSalary:
+          type: number
+        maxSalary:
+          type: number
+        currency:
+          type: string
+          default: IDR
+    EmployeeSalaryProfileRequest:
+      type: object
+      required: [basicSalary, effectiveDate, taxStatus]
+      properties:
+        basicSalary:
+          type: number
+        currency:
+          type: string
+          default: IDR
+        effectiveDate:
+          type: string
+          format: date
+        paymentMethod:
+          type: string
+          default: BANK_TRANSFER
+        bankName:
+          type: string
+        bankAccountNumber:
+          type: string
+        bankAccountHolder:
+          type: string
+        taxStatus:
+          type: string
+        components:
+          type: array
+          items:
+            type: object
+            required: [componentId, amount]
+            properties:
+              componentId:
+                type: string
+                format: uuid
+              amount:
+                type: number
+    TaxConfigurationRequest:
+      type: object
+      required: [taxYear, bracketOrder, minTaxableIncome, taxRatePercent]
+      properties:
+        taxYear:
+          type: integer
+        bracketOrder:
+          type: integer
+        minTaxableIncome:
+          type: number
+        maxTaxableIncome:
+          type: number
+        taxRatePercent:
+          type: number
+    TaxCalculationRequest:
+      type: object
+      required: [annualGrossIncome, taxStatus]
+      properties:
+        annualGrossIncome:
+          type: number
+        taxStatus:
+          type: string
+        taxYear:
+          type: integer
+          default: 2026
+    PayrollPeriodCreateRequest:
+      type: object
+      required: [code, name, startDate, endDate, attendanceCutoffDate, payoutDate]
+      properties:
+        code:
+          type: string
+          example: "PR-2027-01"
+        name:
+          type: string
+          example: "January 2027 Main Payroll"
+        startDate:
+          type: string
+          format: date
+          example: "2027-01-01"
+        endDate:
+          type: string
+          format: date
+          example: "2027-01-31"
+        attendanceCutoffDate:
+          type: string
+          format: date
+          example: "2027-01-25"
+        payoutDate:
+          type: string
+          format: date
+          example: "2027-01-28"
+    PayrollPeriodStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [PLANNED, ACTIVE, PROCESSING, COMPLETED, CLOSED]
+          example: "ACTIVE"
+    PayrollRunExecutionRequest:
+      type: object
+      required: [periodId, executionDate]
+      properties:
+        periodId:
+          type: string
+          format: uuid
+        executionDate:
+          type: string
+          format: date
+          example: "2027-02-25"
+    EmployeeLoanCreateRequest:
+      type: object
+      required: [employeeId, loanAmount, installmentCount, startDate]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        loanAmount:
+          type: number
+          example: 5000000.00
+        installmentCount:
+          type: integer
+          example: 5
+        startDate:
+          type: string
+          format: date
+          example: "2027-02-01"
+        reason:
+          type: string
+          example: "Emergency family assistance"
+    EmployeeReimbursementCreateRequest:
+      type: object
+      required: [employeeId, title, claimType, amount]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: "Client Dinner"
+        claimType:
+          type: string
+          enum: [TRAVEL, MEDICAL, OFFICE, MEAL, OTHER]
+          example: "MEAL"
+        amount:
+          type: number
+          example: 450000.00
+        receiptUrl:
+          type: string
+          example: "https://storage.ventura.com/receipts/rec-001.pdf"
+    TrainingCourseCreateRequest:
+      type: object
+      required: [companyId, code, title]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "TRN-JAVA-01"
+        title:
+          type: string
+          example: "Advanced Java & Spring Boot"
+        category:
+          type: string
+          enum: [TECHNICAL, LEADERSHIP, COMPLIANCE, SOFT_SKILLS]
+          example: "TECHNICAL"
+        providerName:
+          type: string
+          example: "Tech Academy"
+        durationHours:
+          type: number
+          example: 16.0
+        cost:
+          type: number
+          example: 2500000.0
+        isActive:
+          type: boolean
+          example: true
+        description:
+          type: string
+          example: "In-depth course on Spring framework"
+    TrainingSessionCreateRequest:
+      type: object
+      required: [courseId, sessionName, startTime, endTime]
+      properties:
+        courseId:
+          type: string
+          format: uuid
+        sessionName:
+          type: string
+          example: "Cohort 1 - Weekend"
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: "Room 101 / Zoom"
+        capacity:
+          type: integer
+          example: 25
+        status:
+          type: string
+          enum: [SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED]
+          example: "SCHEDULED"
+        instructorName:
+          type: string
+          example: "John Doe"
+    TrainingEnrollmentCreateRequest:
+      type: object
+      required: [sessionId, employeeId]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: "REQUESTED"
+    EnrollmentStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [REQUESTED, APPROVED, ATTENDED, COMPLETED, CANCELLED]
+          example: "COMPLETED"
+        score:
+          type: number
+          example: 95.5
+        certificateUrl:
+          type: string
+          example: "https://storage.ventura.com/certs/cert-001.pdf"
+    EmployeeCertificationCreateRequest:
+      type: object
+      required: [employeeId, certificationName, issuingOrganization, issueDate]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        certificationName:
+          type: string
+          example: "AWS Solutions Architect"
+        issuingOrganization:
+          type: string
+          example: "Amazon Web Services"
+        credentialId:
+          type: string
+          example: "AWS-12345"
+        issueDate:
+          type: string
+          format: date
+          example: "2026-01-15"
+        expirationDate:
+          type: string
+          format: date
+          example: "2029-01-15"
+        verificationUrl:
+          type: string
+          example: "https://aws.amazon.com/verify/AWS-12345"
+    AssetCategoryCreateRequest:
+      type: object
+      required: [companyId, code, name]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "HW-LAPTOP"
+        name:
+          type: string
+          example: "Laptops & Notebooks"
+        description:
+          type: string
+          example: "Workstation laptops and ultrabooks"
+    CompanyAssetCreateRequest:
+      type: object
+      required: [companyId, categoryId, assetTag, name, purchaseDate]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        assetTag:
+          type: string
+          example: "AST-MBP-01"
+        name:
+          type: string
+          example: "MacBook Pro 16-inch M3 Max"
+        model:
+          type: string
+          example: "Apple MBP 2024"
+        serialNumber:
+          type: string
+          example: "SN-C02XYZ1234"
+        purchaseDate:
+          type: string
+          format: date
+          example: "2024-02-01"
+        purchaseCost:
+          type: number
+          example: 42000000.00
+        status:
+          type: string
+          enum: [AVAILABLE, ALLOCATED, MAINTENANCE, DISPOSED]
+          example: "AVAILABLE"
+        conditionGrade:
+          type: string
+          enum: [EXCELLENT, GOOD, FAIR, DAMAGED]
+          example: "EXCELLENT"
+        notes:
+          type: string
+          example: "Brand new unit with box"
+    AssetAllocationCreateRequest:
+      type: object
+      required: [assetId, employeeId, allocatedDate]
+      properties:
+        assetId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+        allocatedDate:
+          type: string
+          format: date
+          example: "2024-03-01"
+        handoverNotes:
+          type: string
+          example: "Handed over with charger and bag"
+    AssetReturnRequest:
+      type: object
+      required: [returnDate]
+      properties:
+        returnDate:
+          type: string
+          format: date
+          example: "2024-06-01"
+        returnNotes:
+          type: string
+          example: "Returned upon project completion"
+        conditionGrade:
+          type: string
+          enum: [EXCELLENT, GOOD, FAIR, DAMAGED]
+          example: "GOOD"
+    OffboardingCaseCreateRequest:
+      type: object
+      required: [employeeId, separationType, noticeDate, lastWorkingDate]
+      properties:
+        employeeId:
+          type: string
+          format: uuid
+        separationType:
+          type: string
+          enum: [RESIGNATION, TERMINATION, RETIREMENT, CONTRACT_END]
+          example: "RESIGNATION"
+        noticeDate:
+          type: string
+          format: date
+          example: "2027-06-01"
+        lastWorkingDate:
+          type: string
+          format: date
+          example: "2027-07-01"
+        reason:
+          type: string
+          example: "Relocating abroad for graduate studies"
+    ChecklistClearRequest:
+      type: object
+      required: [clearedBy]
+      properties:
+        clearedBy:
+          type: string
+          example: "hr.admin@ventura.com"
+        notes:
+          type: string
+          example: "Verified all assets returned and access revoked"
+    ExitInterviewCreateRequest:
+      type: object
+      required: [caseId, primaryReason, cultureRating, managementRating]
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        interviewerId:
+          type: string
+          format: uuid
+        primaryReason:
+          type: string
+          enum: [BETTER_OPPORTUNITY, COMPENSATION, WORK_LIFE_BALANCE, RELOCATION, MANAGEMENT_ISSUES, FURTHER_EDUCATION, PERSONAL_FAMILY, OTHER]
+          example: "BETTER_OPPORTUNITY"
+        cultureRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        managementRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        feedbackText:
+          type: string
+          example: "Great culture and outstanding engineering team!"
